@@ -1,0 +1,25 @@
+sample_id,method_module,batch_id,strength,old_nir,new_nir,reference,sample_type,analyst,instrument_old,instrument_new,date
+SYN-001,Off-line Granule Assay NIR,SYN-B001,100 mg,99.8,99.9,99.7,granule,A01,NIR-OLD-01,NIR-NEW-01,2026-01-12
+SYN-002,Off-line Granule Assay NIR,SYN-B001,100 mg,100.4,100.5,100.3,granule,A01,NIR-OLD-01,NIR-NEW-01,2026-01-12
+SYN-003,Off-line Granule Assay NIR,SYN-B001,100 mg,98.9,99.1,99.0,granule,A02,NIR-OLD-01,NIR-NEW-01,2026-01-12
+SYN-004,Off-line Granule Assay NIR,SYN-B001,100 mg,101.1,101.0,101.2,granule,A02,NIR-OLD-01,NIR-NEW-01,2026-01-12
+SYN-005,Off-line Granule Assay NIR,SYN-B002,100 mg,99.5,99.7,99.6,granule,A01,NIR-OLD-01,NIR-NEW-01,2026-01-13
+SYN-006,Off-line Granule Assay NIR,SYN-B002,100 mg,100.7,100.6,100.8,granule,A01,NIR-OLD-01,NIR-NEW-01,2026-01-13
+SYN-007,Off-line Granule Assay NIR,SYN-B002,100 mg,98.7,98.8,98.9,granule,A02,NIR-OLD-01,NIR-NEW-01,2026-01-13
+SYN-008,Off-line Granule Assay NIR,SYN-B002,100 mg,101.4,101.5,101.3,granule,A02,NIR-OLD-01,NIR-NEW-01,2026-01-13
+SYN-009,Off-line Granule Assay NIR,SYN-B003,100 mg,100.1,100.0,100.2,granule,A01,NIR-OLD-01,NIR-NEW-01,2026-01-14
+SYN-010,Off-line Granule Assay NIR,SYN-B003,100 mg,99.2,99.3,99.1,granule,A01,NIR-OLD-01,NIR-NEW-01,2026-01-14
+SYN-011,Off-line Granule Assay NIR,SYN-B003,100 mg,100.9,101.0,100.8,granule,A02,NIR-OLD-01,NIR-NEW-01,2026-01-14
+SYN-012,Off-line Granule Assay NIR,SYN-B003,100 mg,99.6,99.5,99.7,granule,A02,NIR-OLD-01,NIR-NEW-01,2026-01-14
+SYN-013,Off-line Tablet Transmission NIR,SYN-T001,100 mg,100.2,100.3,100.1,tablet,A03,NIR-OLD-02,NIR-NEW-02,2026-01-15
+SYN-014,Off-line Tablet Transmission NIR,SYN-T001,100 mg,99.4,99.5,99.3,tablet,A03,NIR-OLD-02,NIR-NEW-02,2026-01-15
+SYN-015,Off-line Tablet Transmission NIR,SYN-T001,100 mg,101.0,101.1,100.9,tablet,A04,NIR-OLD-02,NIR-NEW-02,2026-01-15
+SYN-016,Off-line Tablet Transmission NIR,SYN-T001,100 mg,98.8,98.9,98.7,tablet,A04,NIR-OLD-02,NIR-NEW-02,2026-01-15
+SYN-017,Off-line Tablet Transmission NIR,SYN-T002,100 mg,100.5,100.4,100.6,tablet,A03,NIR-OLD-02,NIR-NEW-02,2026-01-16
+SYN-018,Off-line Tablet Transmission NIR,SYN-T002,100 mg,99.1,99.2,99.0,tablet,A03,NIR-OLD-02,NIR-NEW-02,2026-01-16
+SYN-019,Off-line Tablet Transmission NIR,SYN-T002,100 mg,101.3,101.4,101.2,tablet,A04,NIR-OLD-02,NIR-NEW-02,2026-01-16
+SYN-020,Off-line Tablet Transmission NIR,SYN-T002,100 mg,99.9,99.8,100.0,tablet,A04,NIR-OLD-02,NIR-NEW-02,2026-01-16
+SYN-021,Off-line Tablet Transmission NIR,SYN-T003,100 mg,100.8,100.9,100.7,tablet,A03,NIR-OLD-02,NIR-NEW-02,2026-01-17
+SYN-022,Off-line Tablet Transmission NIR,SYN-T003,100 mg,98.6,98.7,98.5,tablet,A03,NIR-OLD-02,NIR-NEW-02,2026-01-17
+SYN-023,Off-line Tablet Transmission NIR,SYN-T003,100 mg,99.7,99.8,99.6,tablet,A04,NIR-OLD-02,NIR-NEW-02,2026-01-17
+SYN-024,Off-line Tablet Transmission NIR,SYN-T003,100 mg,100.3,100.2,100.4,tablet,A04,NIR-OLD-02,NIR-NEW-02,2026-01-17

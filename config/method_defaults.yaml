@@ -1,0 +1,17 @@
+granule_assay_nir:
+  method_display_name: "Off-line Granule Assay NIR"
+  d_equivalence_margin: 1.0
+  k_precision_ratio: 2.0
+  alpha_accuracy: 0.05
+  alpha_precision: 0.05
+  recommended_min_n: 18
+  notes: "Example placeholder. Replace with CP-approved method-specific criterion before GMP use."
+
+tablet_transmission_nir:
+  method_display_name: "Off-line Tablet Transmission NIR"
+  d_equivalence_margin: 1.0
+  k_precision_ratio: 2.0
+  alpha_accuracy: 0.05
+  alpha_precision: 0.05
+  recommended_min_n: 24
+  notes: "Example placeholder. Replace with CP-approved method-specific criterion before GMP use."

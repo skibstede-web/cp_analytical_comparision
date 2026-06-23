@@ -1,0 +1,5 @@
+method_status,run_id,batch_id,n_reference_samples,process_repeatability,mean_bias,rmsep,mae,invalid_spectrum_rate,q_residual_exceedance_rate,hotelling_t2_exceedance_rate
+old,OLD-INL-001,SYN-IB001,10,0.36,-0.01,0.12,0.10,0.00,0.00,0.00
+old,OLD-INL-002,SYN-IB002,10,0.42,-0.02,0.13,0.11,0.00,0.00,0.00
+old,OLD-INL-003,SYN-IB003,10,0.39,-0.01,0.11,0.10,0.00,0.00,0.00
+new,NEW-INL-001,SYN-NB001,16,0.44,0.01,0.13,0.11,0.06,0.06,0.06

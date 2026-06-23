@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+
+reports/html/*
+!reports/html/README.md
+reports/pdf/*
+!reports/pdf/README.md
+
+resources/private/*
+!resources/private/README.md
+
+*.pdf
+*.docx
