@@ -61,6 +61,154 @@ def simulate_paired_old_new_data(
     return old_values, new_values
 
 
+def simulate_paired_study_dataframe(
+    n_samples: int,
+    old_mean: float,
+    old_sd: float,
+    new_mean: float,
+    new_sd: float,
+    sample_to_sample_sd: float = 0.8,
+    reference_sd: float = 0.25,
+    seed: Any = None,
+    sample_prefix: str = "SYN",
+) -> pd.DataFrame:
+    """Simulate paired off-line old/new NIR data with shared sample values."""
+
+    n_int = _validate_count(n_samples, name="n_samples", minimum=2)
+    old_mean_float = _validate_finite(old_mean, name="old_mean")
+    old_sd_float = _validate_positive(old_sd, name="old_sd")
+    new_mean_float = _validate_finite(new_mean, name="new_mean")
+    new_sd_float = _validate_positive(new_sd, name="new_sd")
+    sample_to_sample_sd_float = _validate_positive(
+        sample_to_sample_sd,
+        name="sample_to_sample_sd",
+    )
+    reference_sd_float = _validate_positive(reference_sd, name="reference_sd")
+
+    generator = _rng(seed)
+    true_values = generator.normal(
+        loc=old_mean_float,
+        scale=sample_to_sample_sd_float,
+        size=n_int,
+    )
+    true_bias = new_mean_float - old_mean_float
+    old_nir = true_values + generator.normal(0, old_sd_float, size=n_int)
+    new_nir = true_values + true_bias + generator.normal(0, new_sd_float, size=n_int)
+    reference = true_values + generator.normal(0, reference_sd_float, size=n_int)
+
+    return pd.DataFrame(
+        {
+            "sample_id": [f"{sample_prefix}-{i:03d}" for i in range(1, n_int + 1)],
+            "old_nir": old_nir,
+            "new_nir": new_nir,
+            "reference": reference,
+        }
+    )
+
+
+def simulate_granule_assay_study_dataframe(
+    n_samples: int,
+    old_mean: float,
+    old_sd: float,
+    new_mean: float,
+    new_sd: float,
+    sample_to_sample_sd: float = 0.8,
+    reference_sd: float = 0.25,
+    seed: Any = None,
+) -> pd.DataFrame:
+    """Simulate granule assay paired study data with report metadata."""
+
+    df = simulate_paired_study_dataframe(
+        n_samples=n_samples,
+        old_mean=old_mean,
+        old_sd=old_sd,
+        new_mean=new_mean,
+        new_sd=new_sd,
+        sample_to_sample_sd=sample_to_sample_sd,
+        reference_sd=reference_sd,
+        seed=seed,
+        sample_prefix="G-SYN",
+    )
+    n_int = len(df)
+    dates = pd.date_range("2026-03-01", periods=n_int, freq="D")
+    df.insert(1, "batch_id", [f"G-B{1 + (i // 8):03d}" for i in range(n_int)])
+    df.insert(2, "granule_lot", [f"G-L{1 + (i // 6):03d}" for i in range(n_int)])
+    df.insert(3, "vial_id", [f"V-{i:03d}" for i in range(1, n_int + 1)])
+    df["refill_replicate"] = [(i % 3) + 1 for i in range(n_int)]
+    df["analyst"] = [f"GA{(i % 3) + 1:02d}" for i in range(n_int)]
+    df["instrument_old"] = "NIR-OLD-GRANULE"
+    df["instrument_new"] = "NIR-NEW-GRANULE"
+    df["date"] = dates.strftime("%Y-%m-%d")
+    return df[
+        [
+            "sample_id",
+            "batch_id",
+            "granule_lot",
+            "vial_id",
+            "old_nir",
+            "new_nir",
+            "reference",
+            "refill_replicate",
+            "analyst",
+            "instrument_old",
+            "instrument_new",
+            "date",
+        ]
+    ]
+
+
+def simulate_tablet_transmission_study_dataframe(
+    n_samples: int,
+    old_mean: float,
+    old_sd: float,
+    new_mean: float,
+    new_sd: float,
+    sample_to_sample_sd: float = 0.8,
+    reference_sd: float = 0.25,
+    seed: Any = None,
+) -> pd.DataFrame:
+    """Simulate tablet transmission paired study data for a fixed path."""
+
+    df = simulate_paired_study_dataframe(
+        n_samples=n_samples,
+        old_mean=old_mean,
+        old_sd=old_sd,
+        new_mean=new_mean,
+        new_sd=new_sd,
+        sample_to_sample_sd=sample_to_sample_sd,
+        reference_sd=reference_sd,
+        seed=seed,
+        sample_prefix="T-SYN",
+    )
+    n_int = len(df)
+    generator = _rng(seed)
+    dates = pd.date_range("2026-03-10", periods=n_int, freq="D")
+    df.insert(1, "batch_id", [f"T-B{1 + (i // 8):03d}" for i in range(n_int)])
+    df.insert(2, "tablet_id", [f"TAB-{i:03d}" for i in range(1, n_int + 1)])
+    df.insert(3, "strength", ["100 mg"] * n_int)
+    df["tablet_weight"] = generator.normal(250.0, 1.2, size=n_int)
+    df["tablet_thickness"] = generator.normal(4.10, 0.04, size=n_int)
+    df["instrument_old"] = "NIR-OLD-TABLET"
+    df["instrument_new"] = "NIR-NEW-TABLET"
+    df["date"] = dates.strftime("%Y-%m-%d")
+    return df[
+        [
+            "sample_id",
+            "batch_id",
+            "tablet_id",
+            "strength",
+            "old_nir",
+            "new_nir",
+            "reference",
+            "tablet_weight",
+            "tablet_thickness",
+            "instrument_old",
+            "instrument_new",
+            "date",
+        ]
+    ]
+
+
 def simulate_paired_comparison_success(
     n: int,
     true_bias: float,

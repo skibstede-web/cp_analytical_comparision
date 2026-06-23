@@ -237,6 +237,194 @@ def compare_new_to_historical_run_summary(
     }
 
 
+def simulate_inline_diversion_study(
+    n_timepoints: int,
+    n_reference_samples: int,
+    old_mean: float,
+    old_sd: float,
+    new_mean: float,
+    new_sd: float,
+    low_level: float,
+    target_level: float,
+    high_level: float,
+    lower_diversion_limit: float,
+    upper_diversion_limit: float,
+    process_trend_sd: float = 0.20,
+    reference_sd: float = 0.30,
+    diagnostic_noise_sd: float = 0.20,
+    seed: Any = None,
+) -> dict[str, pd.DataFrame]:
+    """Simulate an inline diversion-control verification study."""
+
+    n_timepoints_int = int(n_timepoints)
+    n_reference_int = int(n_reference_samples)
+    if n_timepoints_int != n_timepoints or n_timepoints_int < 30:
+        raise ValueError("n_timepoints must be an integer greater than or equal to 30.")
+    if (
+        n_reference_int != n_reference_samples
+        or n_reference_int < 3
+        or n_reference_int > n_timepoints_int
+    ):
+        raise ValueError(
+            "n_reference_samples must be an integer between 3 and n_timepoints."
+        )
+
+    old_mean_float = _finite(old_mean, name="old_mean")
+    old_sd_float = _positive_finite(old_sd, name="old_sd")
+    new_mean_float = _finite(new_mean, name="new_mean")
+    new_sd_float = _positive_finite(new_sd, name="new_sd")
+    low_level_float = _finite(low_level, name="low_level")
+    target_level_float = _finite(target_level, name="target_level")
+    high_level_float = _finite(high_level, name="high_level")
+    lower_limit_float = _finite(lower_diversion_limit, name="lower_diversion_limit")
+    upper_limit_float = _finite(upper_diversion_limit, name="upper_diversion_limit")
+    if lower_limit_float >= upper_limit_float:
+        raise ValueError("lower_diversion_limit must be less than upper_diversion_limit.")
+    process_trend_sd_float = _positive_finite(
+        process_trend_sd,
+        name="process_trend_sd",
+    )
+    reference_sd_float = _positive_finite(reference_sd, name="reference_sd")
+    diagnostic_noise_sd_float = _positive_finite(
+        diagnostic_noise_sd,
+        name="diagnostic_noise_sd",
+    )
+
+    rng = np.random.default_rng(seed)
+    segment_sizes = np.full(3, n_timepoints_int // 3, dtype=int)
+    segment_sizes[: n_timepoints_int % 3] += 1
+    true_levels = np.concatenate(
+        [
+            np.full(segment_sizes[0], low_level_float),
+            np.full(segment_sizes[1], target_level_float),
+            np.full(segment_sizes[2], high_level_float),
+        ]
+    )
+    trend_steps = rng.normal(
+        0.0,
+        process_trend_sd_float / np.sqrt(n_timepoints_int),
+        size=n_timepoints_int,
+    )
+    process_trend = np.cumsum(trend_steps)
+    new_bias = new_mean_float - old_mean_float
+    nir_prediction = (
+        true_levels
+        + new_bias
+        + process_trend
+        + rng.normal(0.0, new_sd_float, size=n_timepoints_int)
+    )
+    timestamps = pd.date_range(
+        "2026-04-10 08:00:00",
+        periods=n_timepoints_int,
+        freq="2min",
+    )
+    q_residual = np.abs(rng.normal(0.60, diagnostic_noise_sd_float, n_timepoints_int))
+    hotelling_t2 = np.abs(
+        rng.normal(5.00, diagnostic_noise_sd_float * 4.0, n_timepoints_int)
+    )
+    valid_spectrum = np.ones(n_timepoints_int, dtype=bool)
+
+    new_run_df = pd.DataFrame(
+        {
+            "run_id": "NEW-INL-SIM-001",
+            "batch_id": "SIM-NB001",
+            "timestamp": timestamps.strftime("%Y-%m-%dT%H:%M:%S"),
+            "segment": np.repeat(["low", "target", "high"], segment_sizes),
+            "true_level": true_levels,
+            "nir_prediction": nir_prediction,
+            "diversion_lower_limit": lower_limit_float,
+            "diversion_upper_limit": upper_limit_float,
+            "q_residual": q_residual,
+            "hotelling_t2": hotelling_t2,
+            "valid_spectrum": valid_spectrum,
+        }
+    )
+
+    reference_indices = np.linspace(
+        0,
+        n_timepoints_int - 1,
+        n_reference_int,
+        dtype=int,
+    )
+    new_reference_df = new_run_df.iloc[reference_indices].copy().reset_index(drop=True)
+    new_reference_df["reference_sample_id"] = [
+        f"REF-N-SIM-{i:03d}" for i in range(1, n_reference_int + 1)
+    ]
+    new_reference_df["reference_result"] = (
+        new_reference_df["true_level"].to_numpy(dtype=float)
+        + rng.normal(0.0, reference_sd_float, size=n_reference_int)
+    )
+
+    historical_levels = np.resize(
+        np.array([low_level_float, target_level_float, high_level_float]),
+        n_reference_int,
+    )
+    historical_df = pd.DataFrame(
+        {
+            "run_id": "OLD-INL-SIM-REF",
+            "batch_id": "SIM-IB001",
+            "timestamp": pd.date_range(
+                "2026-04-01 08:00:00",
+                periods=n_reference_int,
+                freq="15min",
+            ).strftime("%Y-%m-%dT%H:%M:%S"),
+            "nir_prediction": historical_levels
+            + rng.normal(0.0, old_sd_float, size=n_reference_int),
+            "reference_result": historical_levels
+            + rng.normal(0.0, reference_sd_float, size=n_reference_int),
+            "reference_sample_id": [
+                f"REF-H-SIM-{i:03d}" for i in range(1, n_reference_int + 1)
+            ],
+            "diversion_lower_limit": lower_limit_float,
+            "diversion_upper_limit": upper_limit_float,
+            "q_residual": np.abs(
+                rng.normal(0.50, diagnostic_noise_sd_float, n_reference_int)
+            ),
+            "hotelling_t2": np.abs(
+                rng.normal(4.50, diagnostic_noise_sd_float * 4.0, n_reference_int)
+            ),
+            "valid_spectrum": True,
+        }
+    )
+
+    old_repeatability = np.clip(
+        rng.normal(old_sd_float, max(old_sd_float * 0.08, 0.01), size=3),
+        0.01,
+        None,
+    )
+    run_summary_df = pd.DataFrame(
+        {
+            "method_status": ["old", "old", "old", "new"],
+            "run_id": [
+                "OLD-INL-SIM-001",
+                "OLD-INL-SIM-002",
+                "OLD-INL-SIM-003",
+                "NEW-INL-SIM-001",
+            ],
+            "batch_id": ["SIM-IB001", "SIM-IB002", "SIM-IB003", "SIM-NB001"],
+            "n_reference_samples": [
+                n_reference_int,
+                n_reference_int,
+                n_reference_int,
+                n_reference_int,
+            ],
+            "process_repeatability": [
+                float(old_repeatability[0]),
+                float(old_repeatability[1]),
+                float(old_repeatability[2]),
+                float(new_sd_float),
+            ],
+        }
+    )
+
+    return {
+        "historical_reference_df": historical_df,
+        "new_run_df": new_run_df,
+        "new_reference_df": new_reference_df,
+        "run_summary_df": run_summary_df,
+    }
+
+
 def process_repeatability_placeholder(*args: Any, **kwargs: Any) -> None:
     """Placeholder for the company-specific process repeatability calculation."""
 
